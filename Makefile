@@ -42,6 +42,7 @@ pprof-image:
 .PHONY: truncate
 truncate:
 	sudo truncate -s 0 -c /var/log/nginx/access.log
+	sudo rm -f /var/log/mysql/mysql-slow.log
 
 .PHONY: restart-mysql
 restart-mysql:
