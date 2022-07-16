@@ -42,18 +42,17 @@ pprof-image:
 .PHONY: truncate
 truncate:
 	sudo truncate -s 0 -c /var/log/nginx/access.log
-	sudo rm -f /var/log/mysql/mysql-slow.log
 
 .PHONY: restart-mysql
 restart-mysql:
-	sudo systemctl restart mysql.service
+	sudo systemctl restart mysql
 .PHONY: restart-nginx
 restart-nginx:
 	sudo systemctl restart nginx
 
 .PHONY: setting-mysql
 setting-mysql:
-	sudo nano /etc/mysql/my.cnf
+	sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 .PHONY: setting-nginx
 setting-nginx:
 	sudo nano /etc/nginx/nginx.conf
