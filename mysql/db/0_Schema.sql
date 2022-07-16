@@ -37,5 +37,6 @@ CREATE TABLE isuumo.chair
     stock       INTEGER         NOT NULL
 );
 
-ALTER TABLE isuumo.chair ADD INDEX chair_stock_index (`stock`); 
+ALTER TABLE isuumo.chair ADD INDEX chair_price_index (`price`); 
 ALTER TABLE isuumo.estate ADD INDEX state_rent_index (`rent`); 
+ALTER TABLE isuumo.chair ADD INDEX chair_height_and_width_index (`height`,`width`); 
