@@ -200,7 +200,8 @@ func (r *RecordMapper) Err() error {
 
 func NewMySQLConnectionEnv() *MySQLConnectionEnv {
 	return &MySQLConnectionEnv{
-		Host:     getEnv("MYSQL_HOST", "127.0.0.1"),
+		//Host:     getEnv("MYSQL_HOST", "127.0.0.1"),
+		Host:     getEnv("MYSQL_HOST", "192.168.0.81"),
 		Port:     getEnv("MYSQL_PORT", "3306"),
 		User:     getEnv("MYSQL_USER", "isucon"),
 		DBName:   getEnv("MYSQL_DBNAME", "isuumo"),
@@ -218,7 +219,7 @@ func getEnv(key, defaultValue string) string {
 
 //ConnectDB isuumoデータベースに接続する
 func (mc *MySQLConnectionEnv) ConnectDB() (*sqlx.DB, error) {
-	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", mc.User, mc.Password, mc.Host, mc.Port, mc.DBName)
+	dsn := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?interpolateParams=true", mc.User, mc.Password, mc.Host, mc.Port, mc.DBName)
 	return sqlx.Open("mysql", dsn)
 }
 
@@ -400,14 +401,18 @@ func searchChairs(c echo.Context) error {
 			c.Echo().Logger.Infof("priceRangeID invalid, %v : %v", c.QueryParam("priceRangeId"), err)
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if chairPrice.Min != -1 {
-			conditions = append(conditions, "price >= ?")
-			params = append(params, chairPrice.Min)
-		}
-		if chairPrice.Max != -1 {
-			conditions = append(conditions, "price < ?")
-			params = append(params, chairPrice.Max)
+		if chairPrice.Min != -1 && chairPrice.Max != -1 {
+			conditions = append(conditions, "price between ? and ?")
+			params = append(params, chairPrice.Min, chairPrice.Max)
+		} else {
+			if chairPrice.Min != -1 {
+				conditions = append(conditions, "price >= ?")
+				params = append(params, chairPrice.Min)
+			}
+			if chairPrice.Max != -1 {
+				conditions = append(conditions, "price < ?")
+				params = append(params, chairPrice.Max)
+			}
 		}
 	}
 
@@ -731,14 +736,18 @@ func searchEstates(c echo.Context) error {
 			c.Echo().Logger.Infof("rentRangeID invalid, %v : %v", c.QueryParam("rentRangeId"), err)
 			return c.NoContent(http.StatusBadRequest)
 		}
-
-		if estateRent.Min != -1 {
-			conditions = append(conditions, "rent >= ?")
-			params = append(params, estateRent.Min)
-		}
-		if estateRent.Max != -1 {
-			conditions = append(conditions, "rent < ?")
-			params = append(params, estateRent.Max)
+		if estateRent.Min != -1 && estateRent.Max != -1 {
+			conditions = append(conditions, "rent between ? and ?")
+			params = append(params, estateRent.Min, estateRent.Max)
+		} else {
+			if estateRent.Min != -1 {
+				conditions = append(conditions, "rent >= ?")
+				params = append(params, estateRent.Min)
+			}
+			if estateRent.Max != -1 {
+				conditions = append(conditions, "rent < ?")
+				params = append(params, estateRent.Max)
+			}
 		}
 	}
 
