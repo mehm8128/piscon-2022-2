@@ -42,12 +42,15 @@ pprof-image:
 .PHONY: truncate
 truncate:
 	sudo truncate -s 0 -c /var/log/nginx/access.log
+	sudo truncate -s 0 -c /var/log/mysql/mysql-slow.log
 
 .PHONY: restart-mysql
 restart-mysql:
+  sudo cp ./mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
 	sudo systemctl restart mysql
 .PHONY: restart-nginx
 restart-nginx:
+  sudo cp ./nginx.conf /etc/nginx/nginx.conf
 	sudo systemctl restart nginx
 
 .PHONY: setting-mysql
@@ -67,3 +70,23 @@ pre-bench:
 after-bench:
 	make alp
 	make slow-show
+
+.PHONY: setup
+setup:
+	wget https://github.com/tkuchiki/alp/releases/download/v1.0.9/alp_linux_amd64.zip
+	unzip alp_linux_amd64.zip
+	sudo install ./alp /usr/local/bin
+	sudo apt -y install percona-toolkit
+	wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh
+	sudo mkdir /temp
+	sudo apt -y install graphviz
+	cp /etc/nginx/nginx.conf ~/isuumo/webapp
+	cp /etc/mysql/mysql.conf.d/mysqld.cnf ~/isuumo/webapp
+
+.PHONY: pprof-record
+pprof-record:
+	go tool pprof http://localhost:6060/debug/pprof/profile
+.PHONY: pprof-check
+pprof-check:
+	$(eval latest := $(shell ls -rt ~/pprof/ | tail -n 1))
+	go tool pprof -http=localhost:8090 ~/pprof/$(latest)
